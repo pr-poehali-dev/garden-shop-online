@@ -1,7 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 
 type IName = string;
+
+const API_URL = "https://functions.poehali.dev/b74f91bc-22a6-47bd-9cc0-174ffbb5bd8d";
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  badge: string | null;
+  icon: string;
+  active: boolean;
+  sort_order: number;
+}
 
 const HERO_IMAGE = "https://cdn.poehali.dev/projects/0a6051c2-e102-4c4c-9442-b643b6041a58/files/4b4b59d1-f472-46bc-81e8-501ed326c05c.jpg";
 const PRODUCTS_IMAGE = "https://cdn.poehali.dev/projects/0a6051c2-e102-4c4c-9442-b643b6041a58/files/80dfeb7e-dedc-41b7-888c-d3da0ea38a4c.jpg";
@@ -13,15 +26,6 @@ const NAV_LINKS = [
   { label: "Доставка", href: "delivery" },
   { label: "Отзывы", href: "reviews" },
   { label: "Контакты", href: "contacts" },
-];
-
-const PRODUCTS = [
-  { id: 1, name: "БиоЩит Универсальный", desc: "Защита от 95% вредителей. Безопасен для пчёл и почвы.", price: "890 ₽", badge: "Хит", icon: "Leaf" },
-  { id: 2, name: "АкваФунгицид", desc: "Водный раствор от грибковых заболеваний растений.", price: "1 250 ₽", badge: "Новинка", icon: "Droplets" },
-  { id: 3, name: "Сетка антиград 4×6м", desc: "Защита теплицы и грядок от града и птиц.", price: "2 100 ₽", badge: null, icon: "Grid3x3" },
-  { id: 4, name: "Феромонные ловушки", desc: "Привлекают и уничтожают насекомых-вредителей.", price: "450 ₽", badge: null, icon: "Bug" },
-  { id: 5, name: "МикроКорм Почвы", desc: "Восстанавливает баланс микрофлоры после обработки.", price: "680 ₽", badge: null, icon: "Sprout" },
-  { id: 6, name: "ЗащитаПлюс Набор", desc: "Комплект для полного сезона: 4 средства + инструкция.", price: "3 400 ₽", badge: "Выгодно", icon: "Package" },
 ];
 
 const REVIEWS = [
@@ -45,6 +49,18 @@ export default function Index() {
     { from: "bot", text: "Привет! Я помогу подобрать средство защиты для вашего сада 🌿 Расскажите, какая проблема вас беспокоит?" }
   ]);
   const [contactForm, setContactForm] = useState({ name: "", phone: "", message: "" });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then(r => r.json())
+      .then(data => {
+        const parsed = typeof data === "string" ? JSON.parse(data) : data;
+        setProducts((parsed.products || []).filter((p: Product) => p.active));
+      })
+      .finally(() => setProductsLoading(false));
+  }, []);
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
@@ -182,28 +198,49 @@ export default function Index() {
           <div className="mt-4 w-40 mx-auto h-px bg-gradient-to-r from-transparent via-[hsl(138,40%,28%)] to-transparent opacity-40" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PRODUCTS.map((p) => (
-            <div key={p.id} className="group bg-white rounded-2xl border border-[hsl(var(--border))] p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
-              {p.badge && (
-                <span className="absolute top-4 right-4 bg-[hsl(138,40%,28%)] text-white text-xs font-medium px-2.5 py-1 rounded-full">
-                  {p.badge}
-                </span>
-              )}
-              <div className="w-12 h-12 rounded-xl bg-[hsl(90,25%,88%)] flex items-center justify-center mb-4 group-hover:bg-[hsl(138,40%,28%)] transition-colors">
-                <Icon name={p.icon as IName} size={24} className="text-[hsl(138,40%,28%)] group-hover:text-white transition-colors" />
+        {productsLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-[hsl(var(--border))] p-6 animate-pulse">
+                <div className="w-12 h-12 rounded-xl bg-[hsl(90,25%,88%)] mb-4" />
+                <div className="h-5 bg-[hsl(90,25%,88%)] rounded mb-2 w-3/4" />
+                <div className="h-4 bg-[hsl(90,25%,88%)] rounded mb-1 w-full" />
+                <div className="h-4 bg-[hsl(90,25%,88%)] rounded mb-4 w-2/3" />
+                <div className="h-8 bg-[hsl(90,25%,88%)] rounded w-1/2" />
               </div>
-              <h3 className="font-display text-xl font-semibold text-[hsl(25,25%,22%)] mb-2">{p.name}</h3>
-              <p className="text-[hsl(var(--muted-foreground))] text-sm leading-relaxed mb-4">{p.desc}</p>
-              <div className="flex items-center justify-between">
-                <span className="font-display text-2xl font-bold text-[hsl(138,40%,28%)]">{p.price}</span>
-                <button className="bg-[hsl(138,40%,28%)] hover:bg-[hsl(138,30%,38%)] text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                  В корзину
-                </button>
+            ))}
+          </div>
+        )}
+        {!productsLoading && products.length === 0 && (
+          <div className="text-center py-16 text-[hsl(var(--muted-foreground))]">
+            <Icon name="Package" size={40} className="mx-auto mb-3 opacity-40" />
+            <p>Товары ещё не добавлены. Перейдите в <a href="/admin" className="text-[hsl(138,40%,28%)] underline">админ-панель</a>.</p>
+          </div>
+        )}
+        {!productsLoading && products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((p) => (
+              <div key={p.id} className="group bg-white rounded-2xl border border-[hsl(var(--border))] p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                {p.badge && (
+                  <span className="absolute top-4 right-4 bg-[hsl(138,40%,28%)] text-white text-xs font-medium px-2.5 py-1 rounded-full">
+                    {p.badge}
+                  </span>
+                )}
+                <div className="w-12 h-12 rounded-xl bg-[hsl(90,25%,88%)] flex items-center justify-center mb-4 group-hover:bg-[hsl(138,40%,28%)] transition-colors">
+                  <Icon name={p.icon as IName} size={24} className="text-[hsl(138,40%,28%)] group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="font-display text-xl font-semibold text-[hsl(25,25%,22%)] mb-2">{p.name}</h3>
+                <p className="text-[hsl(var(--muted-foreground))] text-sm leading-relaxed mb-4">{p.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-2xl font-bold text-[hsl(138,40%,28%)]">{p.price.toLocaleString("ru-RU")} ₽</span>
+                  <button className="bg-[hsl(138,40%,28%)] hover:bg-[hsl(138,30%,38%)] text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                    В корзину
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ABOUT PRODUCTS */}
