@@ -127,12 +127,14 @@ export default function Index() {
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
               <span className="text-white/90 text-sm font-medium">Натуральные средства защиты</span>
             </div>
-            <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
-              Ваш сад<br />под надёжной<br />
-              <em className="text-green-300 not-italic">защитой</em>
+            <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
+              Кротогон-Крот<br />
+              <span className="text-green-200 text-3xl md:text-4xl font-semibold not-italic block mb-2">не пройдёт.</span>
+              Ваш сад под<br />
+              <em className="text-green-300 not-italic">надёжной защитой</em>
             </h1>
             <p className="text-white/80 text-lg mb-8 leading-relaxed">
-              Эко-средства против вредителей и болезней растений. Безопасно для почвы, пчёл и вашего урожая.
+              Эко-средства против кротов, вредителей и болезней растений. Безопасно для почвы, пчёл и вашего урожая.
             </p>
             <div className="flex flex-wrap gap-3">
               <button
